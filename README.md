@@ -5,7 +5,7 @@ Car Detection and Following
 ## Hardware
 
 - RC car
-- Arduino (model?)
+- Arduino Uno
 - PixyCam (model?)
 
 ## Roadmap
