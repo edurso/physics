@@ -1,3 +1,8 @@
+/*
+ * Program to Read & Filter PWM Signal from RC Controller
+ */
+
+/* Declare Constants */
 const int inPin = 3;
 const int outPin = 5;
 const float speedReducer = 0.25;
@@ -40,7 +45,8 @@ void loop() {
   /* Change Duty Cycle */
   duty *= speedReducer;
 
-  /* Format Duty Cycle */
+  /* Format Duty Cycle 
+      Analog Write Requires Integer Value [0-255] */
   float outDuty = duty * 255;
 
   /* Write Duty Cycle */
