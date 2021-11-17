@@ -2,23 +2,34 @@
  * Program to Read & Filter PWM Signal from RC Controller
  */
 
+#include <Servo.h>
+
+/* Hardware Objects */
+Servo throttle;
+
 /* Declare Constants */
-const int inPin = 3;
-const int outPin = 5;
-const float speedReducer = 0.25;
-const String sep = " ";
+const int throttleIn = 5;
+const int throttleOut = 10;
+const int neutral = 90;
+const float limit = 0.25;
+
+/* Placeholders */
+int rcIn;
+int rx;
+int target = 90;
 
 /**
  * Initialization.
  */
 void setup() {
 
+  /* Configure Pins */
+  pinMode(throttleIn, INPUT);
+  throttle.attach(throttleOut);
+  setThrottle(90);
+
   /* Setup Serial Port For Logging */
   Serial.begin(9600);
-
-  /* Configure Pins */
-  pinMode(inPin, INPUT);
-  pinMode(outPin, OUTPUT);
   
 }
 
@@ -27,29 +38,19 @@ void setup() {
  */
 void loop() {
 
-  /* Read Input */
-  unsigned long ontime = pulseIn(inPin, HIGH); // length (microseconds) of high pulse
-  unsigned long offtime = pulseIn(inPin, LOW); // length (microseconds) of low pulse
-  unsigned long period = ontime + offtime; // period (total time in microseconds for each complete pulse)
-  float freq = 1000000.0 / (float) period; // frequency (Hz)
-  float duty = ((float) ontime / period); // duty cycle ratio of ontime to total period (value between 0.0 and 1.0)
-  Serial.println(duty); // duty cycle
+  /* Read & Map Input */
+  rcIn = pulseIn(throttleIn, HIGH);
+  rx = map(rcIn, 890, 2053, 0, 180);
 
-  /* Check Duty Cycle */
-  if(duty < 0.05) {
-    duty = 0.0;
-  } else if(duty > 1.0) {
-    duty = 1.0;
-  }
+  /* Filter Input */
+  target = neutral + (int) ((rx - neutral) * limit);
+
+  /* Set Output */
+  Serial.println(target);
+  setThrottle(target);
   
-  /* Change Duty Cycle */
-  duty *= speedReducer;
+}
 
-  /* Format Duty Cycle 
-      Analog Write Requires Integer Value [0-255] */
-  float outDuty = duty * 255;
-
-  /* Write Duty Cycle */
-  analogWrite(outPin, (int) outDuty);
-  
+void setThrottle(int speed) {
+  throttle.write(speed);
 }
